@@ -14,7 +14,7 @@ defmodule PeerMonitor do
     children = [
       # Define workers and child supervisors to be supervised
       supervisor(DHT_super, []),
-      worker(Crawler, sites)
+      worker(Crawler, [sites])
     ]
 
     opts = [strategy: :one_for_one, name: @name]

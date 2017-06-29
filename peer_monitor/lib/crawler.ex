@@ -6,12 +6,12 @@ defmodule Crawler do
   
   @name __MODULE__
 
-  @type t :: [ %{ site: charlist, magnets: list, last_update: integer } ]
+  @type t :: %{ site: String.t, magnets: [String.t], last_update: integer }
 
   ### PUBLIC API
 
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, [args], name: @name)
+  def start_link(sites) do
+    GenServer.start_link(__MODULE__, sites, name: @name)
   end
 
   def fetch_magnets(url) do
@@ -28,8 +28,9 @@ defmodule Crawler do
 
   ### INTERNAL API
 
+  @spec init([String.t]) :: {:ok, [Crawler.t]}
   def init(sites) do
-    state = Enum.each(sites, &actual_magnet_fetching/1)
+    state = Enum.map(sites, &actual_magnet_fetching/1)
     {:ok, state}
   end
 
@@ -44,7 +45,7 @@ defmodule Crawler do
   end
 
   def handle_call({:magnets, url}, _from, state) do
-    site = Enum.filter(state, fn(val) ->
+    [site | []] = Enum.filter(state, fn(val) ->
       String.contains?(val.site, url) end)
 
     {:reply, site, state}
@@ -52,6 +53,7 @@ defmodule Crawler do
 
   ### PRIVATE FUNCTIONS
 
+  @spec actual_magnet_fetching(String.t) :: Crawler.t
   defp actual_magnet_fetching(url) do
     {:ok, response} = HTTPoison.get(url)
 
