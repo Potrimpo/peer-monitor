@@ -35,7 +35,8 @@ defmodule PeerMonitor.Mixfile do
     [
       {:mldht, path: "~/GitHub/MLDHT"},
       {:httpoison, "~> 0.12"},
-      {:floki, "~> 0.17.0"}
+      {:floki, "~> 0.17.0"},
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]
   end
 end
