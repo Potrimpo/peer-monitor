@@ -10,7 +10,7 @@ defmodule Crawler do
 
   ### PUBLIC API
 
-  def start_link(sites) do
+  def start_link(sites) when is_list(sites) do
     GenServer.start_link(__MODULE__, sites, name: @name)
   end
 

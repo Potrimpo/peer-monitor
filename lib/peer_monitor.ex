@@ -13,7 +13,7 @@ defmodule PeerMonitor do
 
     children = [
       # Define workers and child supervisors to be supervised
-      supervisor(DHT_super, []),
+      # supervisor(DHT_super, []),
       worker(Crawler, [sites])
     ]
 

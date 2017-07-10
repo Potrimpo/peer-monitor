@@ -9,7 +9,7 @@ defmodule DHT_super do
 
   def init([]) do
     children = [
-      worker(MLDHT, [], restart: :permanent)
+      supervisor(MLDHT, [], [restart: :permanent, id: 1, function: :start])
     ]
 
     # supervise/2 is imported from Supervisor.Spec
