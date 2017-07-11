@@ -12,6 +12,7 @@ defmodule Indexer do
   ### CALLBACKS
 
   def init([]) do
+    :timer.sleep(1000) # Give MLDHT time to setup before calling it
     :ok = begin_dht_crawl()
     {:ok, []}
   end
