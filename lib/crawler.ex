@@ -6,7 +6,8 @@ defmodule Crawler do
   
   @name __MODULE__
 
-  @type t :: %{ site: String.t, magnets: [String.t], last_update: integer }
+  @type t :: %{ site: String.t, magnets: [title_uri_pair], last_update: integer }
+  @type title_uri_pair :: {String.t, String.t}
 
   ### PUBLIC API
 
@@ -18,12 +19,16 @@ defmodule Crawler do
     GenServer.call(@name, {:fetch_magnets, url})
   end
 
-  def magnets do
-    GenServer.call(@name, {:magnets})
+  def state do
+    GenServer.call(@name, {:state})
   end
 
-  def magnets(url) do
-    GenServer.call(@name, {:magnets, url})
+  def state(url) do
+    GenServer.call(@name, {:state, url})
+  end
+
+  def magnets do
+    GenServer.call(@name, {:magnets})
   end
 
   ### INTERNAL API
@@ -40,15 +45,23 @@ defmodule Crawler do
     {:reply, new_elem.magnets, [new_elem | state]}
   end
 
-  def handle_call({:magnets}, _from, state) do
+  def handle_call({:state}, _from, state) do
     {:reply, state, state}
   end
 
-  def handle_call({:magnets, url}, _from, state) do
+  def handle_call({:state, url}, _from, state) do
     [site | []] = Enum.filter(state, fn(val) ->
       String.contains?(val.site, url) end)
 
     {:reply, site, state}
+  end
+
+  def handle_call({:magnets}, _from, state) do
+    magnets = state
+      |> Enum.flat_map(& &1[:magnets])
+      |> Enum.map(& elem(&1, 1))
+
+    {:reply, magnets, state}
   end
 
   ### PRIVATE FUNCTIONS
@@ -62,10 +75,17 @@ defmodule Crawler do
     |> Floki.find("a[href^=magnet]")
     |> Enum.take(10)
     |> Enum.map(&pluck_magnet/1)
+    |> title_magnet_tuple
     |> add_magnet_list(url)
   end
 
   defp pluck_magnet({"a", [ {"href", magnet}, _ ], _}), do: magnet
+
+  @spec title_magnet_tuple([String.t]) :: [title_uri_pair]
+  defp title_magnet_tuple(uris) do
+    Magnet.get(uris, :dn)
+    |> (&List.zip [&1, uris]).()
+  end
 
   defp add_magnet_list(magnets, url), do: %{ magnets: magnets, site: url, last_update: :os.system_time() }
 end

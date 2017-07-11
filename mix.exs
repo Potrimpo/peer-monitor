@@ -34,6 +34,7 @@ defmodule PeerMonitor.Mixfile do
     ## use local while pull request on real repo is pending
     [
       {:mldht, path: "~/GitHub/MLDHT"},
+      {:magnet, path: "~/GitHub/magnet"},
       {:httpoison, "~> 0.12"},
       {:floki, "~> 0.17.0"},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
