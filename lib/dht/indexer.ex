@@ -1,4 +1,4 @@
-defmodule Indexer do
+defmodule Dht.Indexer do
   use GenServer
 
   @name __MODULE__
@@ -14,13 +14,23 @@ defmodule Indexer do
   def init([]) do
     :timer.sleep(1000) # Give MLDHT time to setup before calling it
     :ok = begin_dht_crawl()
+    Process.send_after(self(), :write, 2000) # set up timer for writing nodes out to CSV
     {:ok, %{}}
   end
 
   def handle_cast({:post_node, {hash, node}}, state) do
-    IO.puts "new node! --> #{inspect node}"
+    # IO.puts "new node! --> #{inspect node}"
     new_state = Map.update(state, hash, [node], fn xs -> [node | xs] end)
     {:noreply, new_state}
+  end
+
+  def handle_info(:write, state) do
+    :ok = Stream.map(state, fn {hash, nodes} -> Dht.Writer.encode_and_print(hash, nodes) end)
+    |> Stream.run
+
+    Process.send_after(self(), :write, 2000)
+
+    {:noreply, %{}} # reset state to avoid duplicate data being written to file
   end
 
   # PRIVATE FUNCTIONS
@@ -28,7 +38,6 @@ defmodule Indexer do
   defp begin_dht_crawl() do
     _oks = Crawler.magnets
     |> Magnet.get(:xt) # take the content hash
-    |> Enum.take(1) # just testing
     |> Enum.map(&parse_and_search/1)
 
     :ok

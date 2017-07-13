@@ -13,7 +13,7 @@ defmodule PeerMonitor.Supervisor do
     children = [
       # Define workers and child supervisors to be supervised
       worker(Crawler, [sites]),
-      worker(Indexer, [])
+      worker(Dht.Indexer, [])
     ]
 
     # supervise/2 is imported from Supervisor.Spec
