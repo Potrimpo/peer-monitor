@@ -51,7 +51,7 @@ defmodule Dht.Indexer do
   end
 
   defp dht_search(hash) do
-    MLDHT.search(hash, fn node -> search_callback(hash, node) end)
+    MlDHT.search(hash, fn node -> search_callback(hash, node) end)
   end
 
   defp search_callback(hash, node), do: GenServer.cast(@name, {:post_node, {hash, node}})
@@ -61,6 +61,6 @@ end
 # "b99f93d2df9472910941c4a315718fb0d1eff191" \
 # |> String.upcase \
 # |> Base.decode16! \
-# |> MLDHT.search(fn node -> \
+# |> MlDHT.search(fn node -> \
 #     GenServer.cast(Indexer, {:post_node, node}) \
 #   end)
