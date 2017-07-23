@@ -1,7 +1,15 @@
 defmodule Dht.Indexer do
-  use GenServer
+  @moduledoc"""
+  GenServer that receives new nodes from MlDHT and writes them out to file.
+
+  state is stored in a map of %{ infohash: [node] }
+  """
 
   @name __MODULE__
+  @search_interval 1000 * 60 * 60 # one hour
+  @write_interval  1000 * 2 * 30 # half hour
+
+  use GenServer
 
   ## PUBLIC API
 
@@ -13,8 +21,10 @@ defmodule Dht.Indexer do
 
   def init([]) do
     :timer.sleep(1000) # Give MLDHT time to setup before calling it
+    Process.send_after(self(), :write, @write_interval) # set up timer for writing nodes out to CSV
+
     :ok = begin_dht_crawl()
-    Process.send_after(self(), :write, 2000) # set up timer for writing nodes out to CSV
+
     {:ok, %{}}
   end
 
@@ -24,11 +34,22 @@ defmodule Dht.Indexer do
     {:noreply, new_state}
   end
 
+  def handle_info(:search, state) do
+    Process.send_after(self(), :search, @search_interval) # set up timer for searching DHT
+
+    :ok = begin_dht_crawl()
+
+    {:noreply, state}
+  end
+
+  # this prevents us from continually attempting to write out an empty state to file
+  def handle_info(:write, %{}), do: {:noreply, %{}}
+
   def handle_info(:write, state) do
     :ok = Stream.map(state, fn {hash, nodes} -> Dht.Writer.encode_and_print(hash, nodes) end)
     |> Stream.run
 
-    Process.send_after(self(), :write, 2000)
+    Process.send_after(self(), :write, @write_interval)
 
     {:noreply, %{}} # reset state to avoid duplicate data being written to file
   end

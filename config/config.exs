@@ -9,9 +9,12 @@ use Mix.Config
 # 3rd-party users, it should be done in your "mix.exs" file.
 
 # this makes MLDHT a little bit quieter
-config :logger,
-  backends: [:console],
-  compile_time_purge_level: :warn
+# config :logger,
+#   backends: [:console],
+#   compile_time_purge_level: :warn
+
+config :peer_monitor,
+  output_dir: "./data"
 
 # You can configure for your application as:
 #
