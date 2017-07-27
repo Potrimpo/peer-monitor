@@ -14,9 +14,9 @@ defmodule PeerMonitor do
 
     children = [
       worker(Crawler, [sites]),
-      worker(Dht.Indexer, [])
+      supervisor(Dht, [])
     ]
 
-    supervise(children, strategy: :one_for_one, name: @name)
+    supervise(children, strategy: :one_for_one)
   end
 end

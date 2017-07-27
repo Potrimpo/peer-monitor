@@ -19,8 +19,9 @@ defmodule PeerMonitor.Mixfile do
 
   defp deps do
     [
-      {:mldht, path: "~/GitHub/multinode-MLDHT"},
+      {:mldht, git: "https://github.com/Potrimpo/Multinode-MlDHT.git"},
       {:magnet, git: "https://github.com/Potrimpo/magnet.git"},
+      {:gen_stage, "~> 0.11"},
       {:csv, "~> 2.0.0"},
       {:httpoison, "~> 0.12"},
       {:floki, "~> 0.17.0"},
